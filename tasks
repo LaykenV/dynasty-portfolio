@@ -1,0 +1,20 @@
+create landing page with sleeper username field
+
+set up DB 
+
+set up Drizzle
+
+save scrape data to db and set up daily timer
+
+create routes that serve scrape data
+
+create dashboard //
+
+structure all data
+
+create analyze functions
+
+extra functionalities
+
+adjust scrape to get trends
+
