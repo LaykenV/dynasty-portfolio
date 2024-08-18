@@ -1,0 +1,117 @@
+{
+  "id": "f6b7a9b3-40e7-40f8-87ed-3de21b2803f6",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.ktc_rankings": {
+      "name": "ktc_rankings",
+      "schema": "",
+      "columns": {
+        "overall_ranking": {
+          "name": "overall_ranking",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "player": {
+          "name": "player",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.ud_rankings": {
+      "name": "ud_rankings",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "adp": {
+          "name": "adp",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "projected_points": {
+          "name": "projected_points",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position_rank": {
+          "name": "position_rank",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slot_name": {
+          "name": "slot_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "team_name": {
+          "name": "team_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lineup_status": {
+          "name": "lineup_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "''"
+        },
+        "bye_week": {
+          "name": "bye_week",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "''"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
