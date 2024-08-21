@@ -1,44 +1,68 @@
-/*"use client";
+"use client";
 
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { Input, Label, Button } from '@shadcn/ui';
+import { z } from 'zod';
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { Button } from "@/components/ui/button"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { useRouter } from 'next/navigation';
 
-// Define the interface for the props
-interface LoginFormProps {
-  sleeperUsername: string;
-  fetchSleeper: (username: string) => void;
-}
 
-const LoginForm: React.FC<LoginFormProps> = ({ sleeperUsername, fetchSleeper }) => {
-  const [username, setUsername] = useState<string>(sleeperUsername);
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value);
-  };
+const formSchema = z.object({
+  username: z.string().min(2).max(15),
+});
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    fetchSleeper(username);
+
+
+const LoginForm: React.FC = () => {
+
+  const router = useRouter();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: "",
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values.username);
+    router.push(`/dashboard/${values.username}`);
   };
 
   return (
-    <div className="w-full max-w-sm">
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <Label htmlFor="username">Sleeper Username</Label>
-          <Input
-            type="text"
-            id="username"
-            value={username}
-            onChange={handleInputChange}
-            required
-            placeholder="Enter your Sleeper username"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input placeholder="sleeper username" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Enter your Sleeper Username
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        <Button type="submit">Login</Button>
+          <Button type='submit'>Fetch Your Data</Button>
       </form>
-    </div>
+    </Form>
   );
 };
 
-export default LoginForm;*/
+export default LoginForm;
