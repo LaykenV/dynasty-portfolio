@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server';
+/*import { NextResponse } from 'next/server';
 import { db } from '../../../drizzle/db';
-import { ktcRankings } from '../../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 
 // Define the type for the ranking object
@@ -30,4 +29,4 @@ export async function GET() {
     console.error('Fetching error:', error);
     return NextResponse.json({ error: 'Failed to fetch rankings' }, { status: 500 });
   }
-}
+}*/

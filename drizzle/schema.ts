@@ -1,26 +1,13 @@
-import { integer, pgTable, serial, text, timestamp, uuid, numeric } from 'drizzle-orm/pg-core';
+import { pgTable, text, numeric, integer } from 'drizzle-orm/pg-core';
 
-export const ktcRankings = pgTable('ktc_rankings', {
-  overall_ranking: serial('overall_ranking').primaryKey(),
-  player: text('player').notNull(),
-  value: integer('value').notNull(),
+export const playerData = pgTable('player_data', {
+  player_id: text('player_id').primaryKey(), // Player ID as the primary key
+  name: text('name').notNull(), // Full name of the player
+  ktc_value: text('ktc_value').notNull(), // KTC value as a string
+  ud_adp: text('ud_adp').notNull(), // Underdog ADP as a string
+  ud_projected_points: text('ud_projected_points').notNull(), // Underdog projected points as a string
+  ud_position_rank: text('ud_position_rank').notNull(), // Underdog position rank as a string
+  position: text('position').notNull() // Player position
 });
 
-export const udRankings = pgTable('ud_rankings', {
-    id: uuid('id').primaryKey().defaultRandom(),  // UUID as primary key
-    first_name: text('first_name').notNull(),
-    last_name: text('last_name').notNull(),
-    adp: numeric('adp').notNull(),  // ADP as a numeric value
-    projected_points: numeric('projected_points').notNull(),
-    position_rank: text('position_rank').notNull(),
-    slot_name: text('slot_name').notNull(),
-    team_name: text('team_name').notNull(),
-    lineup_status: text('lineup_status').default(''),  // Default to empty string if not provided
-    bye_week: text('bye_week').default('')  // Default to empty string if not provided
-  });
-
-export const sleeperPlayerData = pgTable('sleeper_player_data', {
-    id: integer('id').notNull(),
-    first_name: text('first_name').notNull(),
-    last_name: text('last_name').notNull()
-  });
+export type PlayerData = typeof playerData.$inferSelect; // This infers the type of a selected row

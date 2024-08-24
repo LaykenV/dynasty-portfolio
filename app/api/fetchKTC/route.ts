@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+/*import { NextResponse } from 'next/server';
 import { chromium } from 'playwright';
 import { db } from '../../../drizzle/db';
 import { ktcRankings } from '../../../drizzle/schema';
@@ -89,4 +89,4 @@ export async function GET() {
     console.log('Closing browser');
     await browser.close();
   }
-}
+}*/

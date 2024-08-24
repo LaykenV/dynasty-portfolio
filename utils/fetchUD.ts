@@ -10,8 +10,8 @@ dotenv.config();
 export interface udEntry {
   first_name: string;
   last_name: string;
-  adp: number;
-  projected_points: number;
+  adp: string;
+  projected_points: string;
   position_rank: string;
   slot_name: string;
 }
@@ -105,11 +105,13 @@ export async function fetchUdRankings(): Promise<udEntry[]> {
     const rankings: udEntry[] = records.map((record: any) => ({
       first_name: String(record.firstName),
       last_name: String(record.lastName),
-      adp: parseFloat(record.adp), // Convert to number
-      projected_points: parseFloat(record.projectedPoints), // Convert to number
-      position_rank: String(record.positionRank),
-      slot_name: String(record.slotName),
+      adp: record.adp,
+      projected_points: record.projectedPoints,
+      position_rank: record.positionRank,
+      slot_name: record.slotName,
     }));
+
+    console.log(rankings);
 
     return rankings;
   } catch (error) {

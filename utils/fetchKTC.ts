@@ -2,7 +2,6 @@
 
 import { chromium } from 'playwright';
 import { db } from '../drizzle/db'; // Adjust path as needed
-import { ktcRankings } from '../drizzle/schema'; // Adjust path as needed
 import { sql } from 'drizzle-orm';
 
 // Define the type for the ranking object

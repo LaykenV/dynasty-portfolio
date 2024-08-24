@@ -1,3 +1,6 @@
+import next from "next";
+import { revalidatePath } from "next/cache";
+
 // Interface representing each player's detailed data
 interface PlayerData {
     player_id: string;
@@ -22,7 +25,7 @@ interface PlayerData {
   export async function fetchSleeperData(): Promise<SleeperEntry> {
     try {
       // Fetch the data from the Sleeper API
-      const response = await fetch('https://api.sleeper.app/v1/players/nfl');
+      const response = await fetch('https://api.sleeper.app/v1/players/nfl', {next: {revalidate: 0}});
       const responseJson = await response.json();
   
       // Filter the data
@@ -42,6 +45,8 @@ interface PlayerData {
         },
         {} as SleeperEntry
       );
+
+      console.log(filteredData);
   
       return filteredData;
     } catch (error) {
