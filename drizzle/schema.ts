@@ -18,3 +18,9 @@ export const udRankings = pgTable('ud_rankings', {
     lineup_status: text('lineup_status').default(''),  // Default to empty string if not provided
     bye_week: text('bye_week').default('')  // Default to empty string if not provided
   });
+
+export const sleeperPlayerData = pgTable('sleeper_player_data', {
+    id: integer('id').notNull(),
+    first_name: text('first_name').notNull(),
+    last_name: text('last_name').notNull()
+  });

@@ -15,3 +15,20 @@ trade analyzer // machine learning? ai api?
 player details
 
 must have great design and responsiveness
+
+
+
+
+
+
+/*
+fetch sleeper player data
+
+make all 3 fetches private routes or internal functions
+have one external api that fetches all 3, compiles to playerSchema and saves to db to set up with github action
+
+one serve route
+
+in dashboard, serve player_data to use against sleeper league data
+
+*/

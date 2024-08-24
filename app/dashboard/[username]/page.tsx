@@ -35,7 +35,9 @@ const Dashboard = async ({ params }: { params: { username: string } }) => {
     console.log('UD rankings', serveUDData);
     console.log('KTC rankings', serveKTCData);
     
-    
+    // team grade calc
+
+    // roster percentage calc
     
   
     return (

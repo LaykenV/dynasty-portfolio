@@ -1,17 +1,18 @@
-import { NextResponse } from 'next/server';
+// src/services/ktcService.ts (adjust the path according to your project structure)
+
 import { chromium } from 'playwright';
-import { db } from '../../../drizzle/db';
-import { ktcRankings } from '../../../drizzle/schema';
+import { db } from '../drizzle/db'; // Adjust path as needed
+import { ktcRankings } from '../drizzle/schema'; // Adjust path as needed
 import { sql } from 'drizzle-orm';
 
 // Define the type for the ranking object
-interface Ranking {
+export interface ktcEntry {
   player: string;
   value: string;
 }
 
 // Function to update the KTC rankings in the database
-async function updateKtcRankings(rankings: Ranking[]) {
+/*async function updateKtcRankings(rankings: Ranking[]) {
   // Truncate the table and reset the overall_ranking
   await db.execute(sql`TRUNCATE TABLE ktc_rankings RESTART IDENTITY`);
 
@@ -22,11 +23,11 @@ async function updateKtcRankings(rankings: Ranking[]) {
       value: parseInt(ranking.value, 10),
     });
   }
-}
+}*/
 
-// Web scraper function to fetch rankings and update the database
-export async function GET() {
-  const browser = await chromium.launch({ headless: false });
+// Web scraper function to fetch rankings
+export async function fetchKtcRankings(): Promise<ktcEntry[]> {
+  const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
   console.log('Browser launched');
 
@@ -39,7 +40,7 @@ export async function GET() {
     await page.click('a.blue-cta.btn.btn-blue[href="/dynasty-rankings"]');
     console.log('Rankings button clicked');
 
-    let rankings: Ranking[] = [];
+    let rankings: ktcEntry[] = [];
 
     for (let i = 0; i < 10; i++) {
       console.log(`Processing page ${i + 1}`);
@@ -47,7 +48,7 @@ export async function GET() {
       await page.waitForSelector('.single-ranking', { timeout: 10000 });
       console.log('Rankings loaded');
 
-      const pageRankings = await page.$$eval('.single-ranking', elements =>
+      const pageRankings: ktcEntry[] = await page.$$eval('.single-ranking', elements =>
         elements.map(el => ({
           player: (el.querySelector('.player-name > p > a') as HTMLElement).innerText,
           value: (el.querySelector('.value') as HTMLElement).innerText,
@@ -78,15 +79,15 @@ export async function GET() {
 
     console.log('Scraping completed');
 
-    // After scraping, update the database with the new rankings
-    //await updateKtcRankings(rankings);
-
-    return NextResponse.json(rankings);
+    return rankings;
   } catch (error) {
     console.error('Scraping error:', error);
-    return NextResponse.json({ error: 'error fetching rankings' }, { status: 500 });
+    throw new Error('Error fetching rankings');
   } finally {
     console.log('Closing browser');
     await browser.close();
   }
 }
+
+// Export the update function as well
+//export { updateKtcRankings };
