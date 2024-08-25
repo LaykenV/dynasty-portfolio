@@ -1,17 +1,19 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/drizzle/db';
-import { playerData } from '@/drizzle/schema';
-import { sql } from 'drizzle-orm';
+import { playerData, pickValues } from '@/drizzle/schema';
 
 export async function GET() {
   try {
     // Query the database to fetch all player data
     const players = await db.select().from(playerData).execute();
 
+    const pickValuesArray = await db.select().from(pickValues).execute();
+
     // Return the fetched data as JSON
     return NextResponse.json({
       success: true,
-      data: players,
+      playerData: players,
+      pickValues: pickValuesArray,
     }, { status: 200 });
   } catch (error) {
     console.error('Error fetching player data:', error);

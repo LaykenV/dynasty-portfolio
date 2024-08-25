@@ -22,13 +22,9 @@ must have great design and responsiveness
 
 
 /*
-fetch sleeper player data
+ ktc position rank and trending
 
-make all 3 fetches private routes or internal functions
-have one external api that fetches all 3, compiles to playerSchema and saves to db to set up with github action
+wire backend 
 
-one serve route
-
-in dashboard, serve player_data to use against sleeper league data
 
 */

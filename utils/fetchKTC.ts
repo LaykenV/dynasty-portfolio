@@ -1,31 +1,23 @@
-// src/services/ktcService.ts (adjust the path according to your project structure)
-
 import { chromium } from 'playwright';
-import { db } from '../drizzle/db'; // Adjust path as needed
-import { sql } from 'drizzle-orm';
 
 // Define the type for the ranking object
 export interface ktcEntry {
   player: string;
   value: string;
+  positionRank: string;
 }
 
-// Function to update the KTC rankings in the database
-/*async function updateKtcRankings(rankings: Ranking[]) {
-  // Truncate the table and reset the overall_ranking
-  await db.execute(sql`TRUNCATE TABLE ktc_rankings RESTART IDENTITY`);
+export interface ktcTrending {
+  name: string;
+}
 
-  // Insert updated rankings
-  for (const ranking of rankings) {
-    await db.insert(ktcRankings).values({
-      player: ranking.player,
-      value: parseInt(ranking.value, 10),
-    });
-  }
-}*/
+export interface KTCRankings {
+  rankings: ktcEntry[];
+  trending: ktcTrending[];
+}
 
-// Web scraper function to fetch rankings
-export async function fetchKtcRankings(): Promise<ktcEntry[]> {
+
+export async function fetchKtcRankings(): Promise<KTCRankings> {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
   console.log('Browser launched');
@@ -48,10 +40,17 @@ export async function fetchKtcRankings(): Promise<ktcEntry[]> {
       console.log('Rankings loaded');
 
       const pageRankings: ktcEntry[] = await page.$$eval('.single-ranking', elements =>
-        elements.map(el => ({
-          player: (el.querySelector('.player-name > p > a') as HTMLElement).innerText,
-          value: (el.querySelector('.value') as HTMLElement).innerText,
-        }))
+        elements.map(el => {
+          const player = (el.querySelector('.player-name > p > a') as HTMLElement).innerText;
+          const value = (el.querySelector('.value') as HTMLElement).innerText;
+          let positionRank = (el.querySelector('.position-team > p') as HTMLElement).innerText;
+          
+          if (positionRank !== "PICK") {
+            positionRank = positionRank.replace(/\D/g, '');
+          }
+
+          return { player, value, positionRank };
+        })
       );
 
       rankings = [...rankings, ...pageRankings];
@@ -76,9 +75,20 @@ export async function fetchKtcRankings(): Promise<ktcEntry[]> {
       console.log('Navigated to next page of rankings');
     }
 
-    console.log('Scraping completed');
+    await page.waitForSelector('div.riser > a.insight-link', { timeout: 10000 });
+    console.log('Trending loaded');
 
-    return rankings;
+    const trending: ktcTrending[] = await page.$$eval('div.riser > a.insight-link', elements =>
+      elements.map(el => ({
+        name: (el.querySelector('.topFivePlayer > .topFiveName > p') as HTMLElement).innerText,
+      }))
+    );
+
+    console.log('Scraping completed');
+    console.log(trending);
+    
+
+    return { rankings, trending };
   } catch (error) {
     console.error('Scraping error:', error);
     throw new Error('Error fetching rankings');
@@ -87,6 +97,3 @@ export async function fetchKtcRankings(): Promise<ktcEntry[]> {
     await browser.close();
   }
 }
-
-// Export the update function as well
-//export { updateKtcRankings };

@@ -1,7 +1,8 @@
 import { db } from '@/drizzle/db';
 import { sql } from 'drizzle-orm';
 import { playerData } from '@/drizzle/schema';
-import { PlayerEntry } from '../app/api/updateDB/route'; // Assuming you have this type defined somewhere
+import { PlayerEntry } from '@/app/api/updateDB/route';
+
 
 export async function updatePlayerData(playerDataObj: PlayerEntry) {
   await db.execute(sql`TRUNCATE TABLE player_data RESTART IDENTITY`);
@@ -16,6 +17,8 @@ export async function updatePlayerData(playerDataObj: PlayerEntry) {
       ud_projected_points: playerData.ud_projected_points,
       ud_position_rank: playerData.ud_position_rank,
       position: playerData.position,
+      trending: playerData.trending,
+      ktc_position_rank: playerData.ktc_position_rank,
     }))
   ).onConflictDoUpdate({
     target: playerData.player_id,
@@ -26,6 +29,8 @@ export async function updatePlayerData(playerDataObj: PlayerEntry) {
       ud_projected_points: sql`excluded.ud_projected_points`,
       ud_position_rank: sql`excluded.ud_position_rank`,
       position: sql`excluded.position`,
+      trending: sql`excluded.trending`,
+      ktc_position_rank: sql`excluded.ktc_position_rank`,
     },
   });
 }
