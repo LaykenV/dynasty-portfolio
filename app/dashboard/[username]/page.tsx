@@ -66,27 +66,46 @@ const Dashboard = async ({ params }: { params: { username: string } }) => {
       displayName: sleeperUserData.display_name,
     }
 
+    const fetchAvatar = async (avatar: string) => {
+      console.log('avatar', avatar);
+      const avatarResponse = await fetch(`https://sleepercdn.com/avatars/thumbs/${avatar}`);
+      console.log('avatarResponse', avatarResponse);
+      if (!avatarResponse.ok) {
+        throw new Error('Failed to fetch avatar');
+      }
+      const avatarBlob = await avatarResponse.blob();
+      return URL.createObjectURL(avatarBlob);
+    }
+
     const sleeperLeagueResponse = await fetch(`https://api.sleeper.app/v1/user/${sleeperUserData.user_id}/leagues/nfl/2024`);
     if (!sleeperLeagueResponse.ok) {
       throw new Error('Failed to fetch Sleeper league data');
     }
     const sleeperLeagueData = await sleeperLeagueResponse.json();
+    console.log('sleeperLeagueData', sleeperLeagueData);
+    
 
     if (!Array.isArray(sleeperLeagueData) || sleeperLeagueData.length === 0) {
       console.warn('No leagues found for the user');
       userData.userLeagues = [];
     } else {  
-      userData.userLeagues = sleeperLeagueData.map((league: any) => ({
-        leagueSettings: {
-          leagueID: league.league_id,
-          name: league.name,
-          leagueSize: league.total_rosters,
-          avatar: league.avatar,
-          rosterPositions: league.roster_positions,
-          teamGrade: 0,
-        },
-        roster: []
-      }));    
+      userData.userLeagues = await Promise.all(sleeperLeagueData.map(async (league: any) => {
+        let avatarUrl = '';
+        if (league.avatar !== null) {
+          avatarUrl = await fetchAvatar(league.avatar);
+        }
+        return {
+          leagueSettings: {
+            leagueID: league.league_id,
+            name: league.name,
+            leagueSize: league.total_rosters,
+            avatar: league.avatar ? avatarUrl : '',
+            rosterPositions: league.roster_positions,
+            teamGrade: 0,
+          },
+          roster: []
+        };
+      }));
     }
 
     if (userData.userLeagues.length > 0) {
@@ -143,7 +162,6 @@ const Dashboard = async ({ params }: { params: { username: string } }) => {
     // team grade calc
 
     // compile player data onto roster
-
   
     return (
       <main className="flex min-h-screen flex-col items-center justify-between p-24">
