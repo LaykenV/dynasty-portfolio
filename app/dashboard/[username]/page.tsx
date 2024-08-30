@@ -40,6 +40,7 @@ export interface PlayerDataEntry {
   ud_position_rank: string;
   trending: boolean;
   ktc_position_rank: string;
+  avatarUrl: string;
 }
 
 export interface PickValuesEntry {
@@ -69,12 +70,10 @@ const Dashboard = async ({ params }: { params: { username: string } }) => {
     const fetchAvatar = async (avatar: string) => {
       console.log('avatar', avatar);
       const avatarResponse = await fetch(`https://sleepercdn.com/avatars/thumbs/${avatar}`);
-      console.log('avatarResponse', avatarResponse);
       if (!avatarResponse.ok) {
         throw new Error('Failed to fetch avatar');
       }
-      const avatarBlob = await avatarResponse.blob();
-      return URL.createObjectURL(avatarBlob);
+      return avatarResponse.url;
     }
 
     const sleeperLeagueResponse = await fetch(`https://api.sleeper.app/v1/user/${sleeperUserData.user_id}/leagues/nfl/2024`);
@@ -82,7 +81,6 @@ const Dashboard = async ({ params }: { params: { username: string } }) => {
       throw new Error('Failed to fetch Sleeper league data');
     }
     const sleeperLeagueData = await sleeperLeagueResponse.json();
-    console.log('sleeperLeagueData', sleeperLeagueData);
     
 
     if (!Array.isArray(sleeperLeagueData) || sleeperLeagueData.length === 0) {
@@ -152,6 +150,7 @@ const Dashboard = async ({ params }: { params: { username: string } }) => {
         }
       });
       player.rosterPercentage = (rostersCount / userData.userLeagues.length) * 100;
+      player.avatarUrl = `https://sleepercdn.com/content/nfl/players/${player.player_id}.jpg`;
     });
 
     console.log('sleeper user data', sleeperUserData);
@@ -160,8 +159,6 @@ const Dashboard = async ({ params }: { params: { username: string } }) => {
     console.log('user data', userData);
 
     // team grade calc
-
-    // compile player data onto roster
   
     return (
       <main className="flex min-h-screen flex-col items-center justify-between p-24">
