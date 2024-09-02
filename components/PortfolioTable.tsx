@@ -14,6 +14,8 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({userData, playerData, pi
     let sortedPlayerData = filteredPlayerData.sort((a, b) => b.rosterPercentage - a.rosterPercentage);
     const backupAvatar = 'https://sleepercdn.com/landing/web2021/img/sleeper-app-logo-2.png';
 
+    console.log(pickValues);
+
     // table with pagination in rosterPercentage descending order 
     // show rosterPercentage, playerName, playerTeam, playerPosition, playerValue, trending?, owned in leagues
     

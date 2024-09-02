@@ -1,4 +1,5 @@
 import PortfolioTable from '../../../components/PortfolioTable';
+import TeamBreakdown from '../../../components/TeamBreakdown';
 
 export interface UserLeagueSettings {
   leagueID: string;
@@ -12,6 +13,7 @@ export interface UserLeagueSettings {
 export interface UserLeagues {
   leagueSettings: UserLeagueSettings;
   roster: string[];
+  picks: string[];
 }
 
 export interface UserData {
@@ -48,6 +50,11 @@ export interface PickValuesEntry {
   pick_value: string;
 }
 
+export interface Pick {
+  season: number;
+  round: number;
+}
+
 
 const Dashboard = async ({ params }: { params: { username: string } }) => {
     const { username } = params;
@@ -68,7 +75,6 @@ const Dashboard = async ({ params }: { params: { username: string } }) => {
     }
 
     const fetchAvatar = async (avatar: string) => {
-      console.log('avatar', avatar);
       const avatarResponse = await fetch(`https://sleepercdn.com/avatars/thumbs/${avatar}`);
       if (!avatarResponse.ok) {
         throw new Error('Failed to fetch avatar');
@@ -101,29 +107,95 @@ const Dashboard = async ({ params }: { params: { username: string } }) => {
             rosterPositions: league.roster_positions,
             teamGrade: 0,
           },
-          roster: []
+          roster: [],
+          picks: []
         };
       }));
     }
 
+    const getUserPick = (tradedAwayPicks: Pick[], acquiredPicks: Pick[]): string[] => {
+      console.log('tradedAwayPicks', tradedAwayPicks);
+      console.log('acquiredPicks', acquiredPicks);
+      // Default picks
+      const defaultPicks: Pick[] = [
+        { season: 2025, round: 1 },
+        { season: 2025, round: 2 },
+        { season: 2025, round: 3 },
+        { season: 2025, round: 4 },
+        { season: 2026, round: 1 },
+        { season: 2026, round: 2 },
+        { season: 2026, round: 3 },
+        { season: 2026, round: 4 },
+        { season: 2027, round: 1 },
+        { season: 2027, round: 2 },
+        { season: 2027, round: 3 },
+        { season: 2027, round: 4 }
+      ];
+    
+      // Remove traded away picks
+      const remainingPicks = defaultPicks.filter(
+        (pick) => !tradedAwayPicks.some(
+          (traded) => traded.season === pick.season && traded.round === pick.round
+        )
+      );
+    
+      // Add acquired picks
+      const adjustedPicks = [...remainingPicks, ...acquiredPicks];
+    
+      // Sort picks by season and round for consistent output
+      adjustedPicks.sort((a, b) => {
+        if (a.season !== b.season) {
+          return a.season - b.season;
+        }
+        return a.round - b.round;
+      });
+    
+      // Convert to string format 'YYYY Xst'
+      const pickStrings = adjustedPicks.map(pick => `${pick.season} ${ordinalRound(pick.round)}`);
+
+      console.log('pickStrings', pickStrings);
+      return pickStrings;
+    }
+
+    // Helper function to convert round number to ordinal format (1 -> '1st', 2 -> '2nd', etc.)
+    const ordinalRound = (round: number): string => {
+      const suffixes = ["th", "st", "nd", "rd"];
+      const v = round % 100;
+      return round + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
+    }
+
     if (userData.userLeagues.length > 0) {
       userData.userLeagues = userData.userLeagues.filter((league: UserLeagues) => league.leagueSettings.rosterPositions.length > 18);
-      console.log('Filtered leagues:', userData.userLeagues);
 
       await Promise.all(userData.userLeagues.map(async (league: UserLeagues) => {
         try {
           const rosterResponse = await fetch(`https://api.sleeper.app/v1/league/${league.leagueSettings.leagueID}/rosters`);
-          if (!rosterResponse.ok) {
+          const tradedPicksResponse = await fetch(`https://api.sleeper.app/v1/league/${league.leagueSettings.leagueID}/traded_picks`);
+          if (!rosterResponse.ok || !tradedPicksResponse.ok) {
             throw new Error('Failed to fetch Sleeper roster data');
           }
+
           const rosterData = await rosterResponse.json();
-          let roster: string[] = [];
-          rosterData.forEach((rosterDataEntry: rosterResponse) => {
-            if (rosterDataEntry.owner_id === userData.userID) {
-              roster = [...rosterDataEntry.starters, ...rosterDataEntry.players];
+          const tradedPicksData = await tradedPicksResponse.json();
+
+          let acquiredPicks: Pick[] = [];
+          let tradedAwayPicks: Pick[] = [];
+          const myRoster = rosterData.find((rosterDataEntry: rosterResponse) => rosterDataEntry.owner_id === userData.userID);
+
+          tradedPicksData.forEach((tradedPickDataEntry: any) => {
+            if (parseInt(tradedPickDataEntry.season) > 2024) {
+              if (tradedPickDataEntry.owner_id === myRoster.roster_id) {
+                acquiredPicks.push( {season: parseInt(tradedPickDataEntry.season), round: tradedPickDataEntry.round});
+              }
+              if (tradedPickDataEntry.previous_owner_id === myRoster.roster_id) {
+                tradedAwayPicks.push( {season: parseInt(tradedPickDataEntry.season), round: tradedPickDataEntry.round});
+              }
             }
           });
-          league.roster = roster;
+
+          league.roster = myRoster.players;
+          console.log('calculating picks for', league.leagueSettings.leagueID);
+          league.picks = getUserPick(tradedAwayPicks, acquiredPicks);
         } catch (error) {
           console.error(`Error fetching roster for league ${league.leagueSettings.leagueID}:`, error);
           league.roster = [];
@@ -141,6 +213,18 @@ const Dashboard = async ({ params }: { params: { username: string } }) => {
     const playerDataArray: PlayerDataEntry[] = playerData.playerData;
     const pickValuesArray: PickValuesEntry[] = playerData.pickValues;
 
+    let filteredPickValuesArray: PickValuesEntry[] = [];
+
+    pickValuesArray.forEach((pickValue: PickValuesEntry) => {
+      if (pickValue.pick_name.includes('Mid')) {
+        const newPickName = pickValue.pick_name.replace('Mid ', '');
+        filteredPickValuesArray.push({
+          pick_name: newPickName,
+          pick_value: pickValue.pick_value,
+        });
+      }
+    }); 
+
     // Calculate roster percentage for each player
     playerDataArray.forEach((player: PlayerDataEntry) => {
       let rostersCount = 0;
@@ -153,17 +237,13 @@ const Dashboard = async ({ params }: { params: { username: string } }) => {
       player.avatarUrl = `https://sleepercdn.com/content/nfl/players/${player.player_id}.jpg`;
     });
 
-    console.log('sleeper user data', sleeperUserData);
-    console.log('sleeper league data', sleeperLeagueData);
-    console.log('player data', playerData);
-    console.log('user data', userData);
-
     // team grade calc
   
     return (
       <main className="flex min-h-screen flex-col items-center justify-between p-24">
         <h1>User Dashboard: {username}</h1>
-        <PortfolioTable userData={userData} playerData={playerDataArray} pickValues={pickValuesArray}></PortfolioTable>
+        <PortfolioTable userData={userData} playerData={playerDataArray} pickValues={filteredPickValuesArray}></PortfolioTable>
+        <TeamBreakdown userData={userData} playerData={playerDataArray} pickValues={filteredPickValuesArray}></TeamBreakdown>
       </main>
     );
   };
