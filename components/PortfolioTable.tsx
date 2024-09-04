@@ -1,6 +1,15 @@
 "use client"
 
 import { UserData, PlayerDataEntry, PickValuesEntry } from "@/app/dashboard/[username]/page";
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+  } from "@/components/ui/table";
 import Image from "next/image";
 
 interface PortfolioTableProps {
@@ -30,16 +39,31 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({userData, playerData, pi
     };
     
     return(
-        <div className="flex flex-col items-center justify-center max-w-screen-lg">
-            {sortedPlayerData.map((player) => (
-                <div key={player.name} className="flex flex-row items-center justify-center">
-                    <h1>{player.rosterPercentage}</h1>
-                    <Image src={player.avatarUrl} alt="team logo" width={100} height={0} style={{ height: 'auto', width: 'auto' }}/>
-                    <h2>{player.name}</h2>
-                    {player.trending && <h3>Trending</h3>}  
-                    <h3>{howManyLeagues(player.player_id).map((avatar, index) => <Image key={index} src={avatar ? avatar : backupAvatar} alt="league avatar" width={40} height={40}/>)}</h3>
-                </div>
-            ))}
+        <div className="flex flex-col items-center justify-center w-full">
+            <Table className="w-full border-2 border-gray-300 rounded-md">
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>%</TableHead>
+                        <TableHead>Player</TableHead>
+                        <TableHead>Dynasty Rank</TableHead>
+                        <TableHead>Redraft Rank</TableHead>
+                        <TableHead>Projected Points</TableHead>
+                        <TableHead>Owned in Leagues</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {sortedPlayerData.map((player) => (
+                        <TableRow key={player.name}>
+                            <TableCell>{player.rosterPercentage}%</TableCell>
+                            <TableCell> <Image src={player.avatarUrl} alt="player avatar" width={70} height={0} style={{ height: 'auto', width: 'auto' }}/> {player.name}</TableCell>
+                            <TableCell>{player.position}{player.ktc_position_rank}</TableCell>
+                            <TableCell>{player.ud_position_rank}</TableCell>
+                            <TableCell>{player.ud_projected_points}</TableCell>
+                            <TableCell className="flex flex-row items-center justify-center gap-7">{howManyLeagues(player.player_id).map((avatar, index) => <Image key={index} src={avatar ? avatar : backupAvatar} alt="league avatar" width={40} height={40}/>)}</TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
         </div>
     )
 }

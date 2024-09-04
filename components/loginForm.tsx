@@ -41,25 +41,22 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <Form {...form}>
+    <Form {...form} >
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
             control={form.control}
             name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel className='text-2xl text-center'>Enter Your Sleeper Username</FormLabel>
                 <FormControl>
-                  <Input placeholder="sleeper username" {...field} />
+                  <Input {...field}  className='w-full p-4'/>
                 </FormControl>
-                <FormDescription>
-                  Enter your Sleeper Username
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button type='submit'>Fetch Your Data</Button>
+          <Button type='submit' className='w-full mt-4'>Fetch Your Data</Button>
       </form>
     </Form>
   );
